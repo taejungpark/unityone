@@ -9,6 +9,7 @@ var ctrluploadFile = require('../controllers/file.js');
 var ctrldelete = require('../controllers/delete.js');
 var ctrlcheck = require('../controllers/check.js');
 var ctrlcompleteFile = require('../controllers/completeFile.js');
+var ctrlAccessLog = require('../controllers/accessLog.js');
 
 // 디버깅: 각 컨트롤러의 함수들이 제대로 로드되었는지 확인
 console.log('=== Controller Functions Check ===');
@@ -58,6 +59,10 @@ router.post('/check-duplicate', ctrlcheck.checkDuplicate);
 
 
 router.get('/completeFile', ctrlcompleteFile.uploadGame)
+
+/* Access Logs page */
+router.get('/access-logs', ctrlAccessLog.viewLogs);
+router.get('/api/access-logs', ctrlAccessLog.getLogsAPI);
 
 
 module.exports = router;

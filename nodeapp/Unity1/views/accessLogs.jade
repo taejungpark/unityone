@@ -1,0 +1,115 @@
+extends layout
+
+block content
+  .container.mt-4
+    h1.text-center= pageHeader.title
+
+    // Filter Form
+    .card.mb-4
+      .card-header
+        h5 Filter Logs
+      .card-body
+        form(method='GET', action='/access-logs')
+          .row
+            .col-md-3
+              .form-group
+                label(for='action') Action
+                select#action.form-control(name='action')
+                  option(value='', selected=!filter.action) All
+                  option(value='upload', selected=filter.action==='upload') Upload
+                  option(value='delete', selected=filter.action==='delete') Delete
+                  option(value='file_upload', selected=filter.action==='file_upload') File Upload
+            .col-md-3
+              .form-group
+                label(for='studentId') Student ID
+                input#studentId.form-control(type='text', name='studentId', value=filter.studentId || '', placeholder='Student ID')
+            .col-md-3
+              .form-group
+                label(for='ip') IP Address
+                input#ip.form-control(type='text', name='ip', value=filter.ip || '', placeholder='IP Address')
+            .col-md-3
+              .form-group
+                label(for='limit') Results per page
+                select#limit.form-control(name='limit')
+                  option(value='50', selected=limit===50) 50
+                  option(value='100', selected=limit===100) 100
+                  option(value='200', selected=limit===200) 200
+          .row
+            .col-md-12
+              button.btn.btn-primary(type='submit') Apply Filter
+              a.btn.btn-secondary.ml-2(href='/access-logs') Clear Filters
+
+    // Results Summary
+    .alert.alert-info
+      strong Total Logs: #{total}
+      | &nbsp;|&nbsp;
+      | Page #{page} of #{totalPages}
+
+    // Logs Table
+    .card
+      .card-header
+        h5 Access Log Records
+      .card-body
+        if logs && logs.length > 0
+          .table-responsive
+            table.table.table-striped.table-hover
+              thead.thead-dark
+                tr
+                  th Timestamp
+                  th IP Address
+                  th Student ID(s)
+                  th Action
+                  th Endpoint
+                  th Method
+                  th Game Name
+                  th Details
+              tbody
+                each log in logs
+                  tr
+                    td= new Date(log.timestamp).toLocaleString()
+                    td
+                      code= log.ip
+                    td
+                      if log.studentId && log.studentId.length > 0
+                        = log.studentId.join(', ')
+                      else
+                        em N/A
+                    td
+                      span.badge(class=log.action==='upload'?'badge-success':log.action==='delete'?'badge-danger':'badge-info')= log.action
+                    td
+                      small= log.endpoint
+                    td= log.method
+                    td= log.gameName || 'N/A'
+                    td
+                      if log.userAgent
+                        small= log.userAgent.substring(0, 50) + '...'
+
+          // Pagination
+          if totalPages > 1
+            nav.mt-3
+              ul.pagination.justify-content-center
+                if page > 1
+                  li.page-item
+                    a.page-link(href=`/access-logs?page=${page-1}&limit=${limit}${filter.action?'&action='+filter.action:''}${filter.studentId?'&studentId='+filter.studentId:''}${filter.ip?'&ip='+filter.ip:''}`) Previous
+                else
+                  li.page-item.disabled
+                    span.page-link Previous
+
+                - var startPage = Math.max(1, page - 2)
+                - var endPage = Math.min(totalPages, page + 2)
+                - for (var i = startPage; i <= endPage; i++)
+                  li.page-item(class=i===page?'active':'')
+                    a.page-link(href=`/access-logs?page=${i}&limit=${limit}${filter.action?'&action='+filter.action:''}${filter.studentId?'&studentId='+filter.studentId:''}${filter.ip?'&ip='+filter.ip:''}`)= i
+
+                if page < totalPages
+                  li.page-item
+                    a.page-link(href=`/access-logs?page=${page+1}&limit=${limit}${filter.action?'&action='+filter.action:''}${filter.studentId?'&studentId='+filter.studentId:''}${filter.ip?'&ip='+filter.ip:''}`) Next
+                else
+                  li.page-item.disabled
+                    span.page-link Next
+        else
+          .alert.alert-warning
+            | No logs found matching the current filter criteria.
+
+    .mt-3.text-center
+      a.btn.btn-secondary(href='/') Back to Home

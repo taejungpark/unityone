@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var gracefulShutdown;
 var dbHost = process.env.DATABASE_HOST || '127.0.0.1';
-var dbURI = 'mongodb://'+dbHost+':27017/gamesubmit_db_debug';
+var dbURI = 'mongodb://'+dbHost+':27017/gamesubmit_db';
 if (process.env.NODE_ENV === 'production') {
     dbURI = process.env.MONGOLAB_URI;
 }
@@ -64,3 +64,4 @@ process.on('SIGTERM', function() {
 
 // BRING IN YOUR SCHEMAS & MODELS
 require('./files');
+require('./accessLog');

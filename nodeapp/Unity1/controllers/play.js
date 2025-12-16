@@ -11,12 +11,12 @@ module.exports.playgame = function(req, res){
     if (objectid.startsWith(':')) {
         objectid = objectid.substring(1);
     }
-    
+
     // URL에서 year와 semester 가져오기 (새 구조용)
     var year = req.query.year;
     var semester = req.query.semester;
     var student_id = req.query.id;
-    
+
     //console.log('objectid:', objectid);
     //console.log('year:', year, 'semester:', semester, 'student_id:', student_id);
     

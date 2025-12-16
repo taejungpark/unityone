@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var fs = require('fs');
 var path = require('path');
 var { getFileModel, getCurrentSemester } = require('../model/files');
+var { logAccess } = require('../middleware/accessLogger');
 
 // dele 함수가 반드시 있어야 함
 module.exports.dele = function(req, res) {
@@ -21,9 +22,16 @@ module.exports.dele = function(req, res) {
 module.exports.verifyGame = function(req, res) {
     //console.log('=== Verify game endpoint hit ===');
     //console.log('Request body:', req.body);
-    
+
+    // Log delete verification attempt
+    logAccess(req, 'delete', {
+        student_id: req.body.student_id,
+        year: req.body.year,
+        semester: req.body.semester
+    });
+
     try {
-       
+
         const { student_id, student_name, password, year, semester } = req.body;
 
         // 입력값 확인
@@ -171,7 +179,7 @@ module.exports.delfile = function(req, res) {
         }
         
         const folderName = file.folderName || file.id[0];
-        const dirPath = path.join('/gamesubmit/nodedev/Unity1/public/fileStorage', year + '_' + semester, folderName);
+        const dirPath = path.join('/gamesubmit/nodeapp/Unity1/public/fileStorage', year + '_' + semester, folderName);
         
         //console.log('Deleting folder:', dirPath);
         

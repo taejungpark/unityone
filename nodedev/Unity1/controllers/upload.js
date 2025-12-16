@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var fs = require('fs');
 var { getFileModel, getCurrentSemester } = require('../model/files');
+var { logAccess } = require('../middleware/accessLogger');
 
 /* GET 'Upload' page*/
 module.exports.upload = function(req, res) {
@@ -18,6 +19,9 @@ module.exports.upload = function(req, res) {
 /* POST 'Add File' endpoint */
 module.exports.addFile = function(req, res){
     //console.log('=== Add File endpoint hit (module.exports.addFile)===');
+    // Log the upload attempt
+    logAccess(req, 'upload', { semester: req.body.semester });
+
     // 현재 연도 가져오기
     const year = new Date().getFullYear();
     const semester = parseInt(req.body.semester);
@@ -34,8 +38,8 @@ module.exports.addFile = function(req, res){
     // 대표 학번 선택 (첫 번째 학번 사용)
     var representativeId = idsFile[0];
 
-    console.log('Checking for duplicate submission...');
-    console.log('Student IDs:', idsFile);
+    //console.log('Checking for duplicate submission...');
+    //console.log('Student IDs:', idsFile);
     
     // 중복 체크: 학번 배열 중 하나라도 이미 존재하는지 확인
     Filedb.findOne({ id: { $in: idsFile } }, function(err, existingFile) {
@@ -108,7 +112,7 @@ module.exports.addFile = function(req, res){
                 return;
             }else{
                 // 폴더 생성 - 연도_학기 형식
-                var dirUrl = '/gamesubmit/nodedev/Unity1/public/fileStorage/' + year + '_' + semester;
+                var dirUrl = '/gamesubmit/nodeapp/Unity1/public/fileStorage/' + year + '_' + semester;
                 
                 // 연도_학기 폴더 생성
                 if (!fs.existsSync(dirUrl)) {

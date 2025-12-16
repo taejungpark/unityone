@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var fs = require('fs');
 var { getFileModel, getCurrentSemester } = require('../model/files');
+var { logAccess } = require('../middleware/accessLogger');
 
 /* GET 'Upload' page*/
 module.exports.upload = function(req, res) {
@@ -18,6 +19,9 @@ module.exports.upload = function(req, res) {
 /* POST 'Add File' endpoint */
 module.exports.addFile = function(req, res){
     //console.log('=== Add File endpoint hit (module.exports.addFile)===');
+    // Log the upload attempt
+    logAccess(req, 'upload', { semester: req.body.semester });
+
     // 현재 연도 가져오기
     const year = new Date().getFullYear();
     const semester = parseInt(req.body.semester);
