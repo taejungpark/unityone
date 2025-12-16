@@ -1,0 +1,67 @@
+doctype html
+head
+  include ./head.jade
+
+section.page-section
+  br
+  br
+  .container
+    h2.page-section-heading.text-center.text-uppercase.text-secondary.mb-0= pageHeader.title
+    
+    // 학기 선택 폼
+    .row.mb-4
+      .col-lg-8.mx-auto
+        form.form-inline.justify-content-center(action='/playlist' method='get')
+          .form-group.mx-2
+            label.mr-2(for='year') Year:
+            select.form-control(name='year' id='year')
+              - for (var y = 2020; y <= new Date().getFullYear() + 1; y++)
+                option(value=y selected=(y == currentYear))= y
+          .form-group.mx-2
+            label.mr-2(for='semester') Semester:
+            select.form-control(name='semester' id='semester')
+              option(value='1' selected=(currentSemester == 1))  1학기
+              option(value='2' selected=(currentSemester == 2))  2학기
+          button.btn.btn-primary.ml-2(type='submit') Search
+    
+    // 현재 표시 중인 학기 정보
+    .row
+      .col-lg-8.mx-auto.text-center.mb-3
+        h4= currentYear + '년 ' + (currentSemester == 1 ? '1학기' : '2학기') + ' Games'
+    
+    // 게임 목록
+    .row
+      if result && result.length > 0
+        each game in result
+          .col-md-6.col-lg-4.mb-4
+            .card.h-100.shadow-sm
+              // 썸네일 이미지 - 안전한 접근
+              - var folderName = game.folderName || (game.id && game.id.length > 0 ? game.id[0] : game.password)
+              - var thumbnailPath = game.thumbnail ? '/fileStorage/' + game.year + '_' + game.semester + '/' + folderName + '/' + game.thumbnail : null
+              //- var thumbnailPath = game.thumbnail ? '/gamesubmit/nodedev/Unity1/public/fileStorage/' + game.year + '_' + game.semester + '/' + folderName + '/' + game.thumbnail : null
+              if thumbnailPath
+                img.card-img-top(src=thumbnailPath alt=game.game_name style='height: 200px; object-fit: cover;')
+              else
+                .card-img-top.bg-secondary.text-white.d-flex.align-items-center.justify-content-center(style='height: 200px;')
+                  i.fas.fa-gamepad.fa-3x
+              
+              .card-body.d-flex.flex-column
+                h5.card-title= game.game_name
+                if game.content
+                  p.card-text.text-muted.small= game.content.substring(0, 100) + (game.content.length > 100 ? '...' : '')
+                
+                .mt-auto
+                  .d-flex.justify-content-between.align-items-center
+                    .small.text-muted
+                      if game.name && game.name.length
+                        i.fas.fa-users.mr-1
+                        = game.name.length + ' member(s)'
+                    a.btn.btn-primary.btn-sm(href='/play/' + game.objectid + '?year=' + game.year + '&semester=' + game.semester + '&id='+folderName) 
+                      i.fas.fa-play.mr-1
+                      | Play
+      else
+        .col-12.text-center
+          p.lead= message || 'No games available for this semester'
+
+#footer
+  include ./footer.jade

@@ -1,0 +1,87 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
+  meta(name='description' content='')
+  meta(name='author' content='')
+  title= title
+  // Custom fonts for this theme
+  link(href='/bootstrap/vendor/fontawesome-free/css/all.min.css' rel='stylesheet' type='text/css')
+  link(href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css')
+  link(href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css')
+  // Theme CSS
+  link(href='/bootstrap/css/freelancer.min.css' rel='stylesheet')
+// Navigation
+nav#mainNav.navbar.navbar-expand-lg.bg-secondary.text-uppercase.fixed-top
+  .container
+    a.navbar-brand.js-scroll-trigger(href='#page-top') Unity One
+    button.navbar-toggler.navbar-toggler-right.text-uppercase.font-weight-bold.bg-primary.text-white.rounded(type='button' data-toggle='collapse' data-target='#navbarResponsive' aria-controls='navbarResponsive' aria-expanded='false' aria-label='Toggle navigation')
+      | Menu
+      i.fas.fa-bars
+    #navbarResponsive.collapse.navbar-collapse
+      ul.navbar-nav.ml-auto
+        li.nav-item.mx-0.mx-lg-1
+          a.nav-link.py-3.px-0.px-lg-3.rounded.js-scroll-trigger(href='../controllers/playlist/') playlist
+        li.nav-item.mx-0.mx-lg-1
+          a.nav-link.py-3.px-0.px-lg-3.rounded.js-scroll-trigger(href='../controllers/upload/') upload
+        li.nav-item.mx-0.mx-lg-1
+          a.nav-link.py-3.px-0.px-lg-3.rounded.js-scroll-trigger(href='../controller/about/') about
+// Masthead
+header.masthead.bg-primary.text-white.text-center
+  .container.d-flex.align-items-center.flex-column
+    // Masthead Avatar Image
+    img.masthead-avatar.mb-5(src='/bootstrap/img/2.svg ' alt='')
+    // Masthead Heading
+    h1.masthead-heading.text-uppercase.mb-0= pageHeader.title
+    // Icon Divider
+    .divider-custom.divider-light
+      .divider-custom-line
+      .divider-custom-icon
+        i.fas.fa-star
+      .divider-custom-line
+    // Masthead Subheading
+    p.masthead-subheading.font-weight-light.mb-0 Enjoy your game
+// Footer
+footer.footer.text-center
+  .container
+    .row
+      // Footer Location
+      .col-lg-4.mb-5.mb-lg-0
+        h4.text-uppercase.mb-4 Location
+        p.lead.mb-0
+          | Duksung Women's University
+          br
+          | 3rd floor, Memorial Building of Chamirisa
+      // Footer Social Icons
+      .col-lg-4.mb-5.mb-lg-0
+        h4.text-uppercase.mb-4 Around the Web
+        a.btn.btn-outline-light.btn-social.mx-1(href='#')
+          i.fab.fa-fw.fa-facebook-f
+        a.btn.btn-outline-light.btn-social.mx-1(href='#')
+          i.fab.fa-fw.fa-twitter
+        a.btn.btn-outline-light.btn-social.mx-1(href='#')
+          i.fab.fa-fw.fa-linkedin-in
+        a.btn.btn-outline-light.btn-social.mx-1(href='#')
+          i.fab.fa-fw.fa-dribbble
+      // Footer About Text
+      .col-lg-4
+        h4.text-uppercase.mb-4 About Freelancer
+        p.lead.mb-0
+          | Freelance is a free to use, MIT licensed Bootstrap theme created by
+          a(href='http://startbootstrap.com') Start Bootstrap
+          | .
+// Copyright Section
+section.copyright.py-4.text-center.text-white
+  .container
+    small Copyright &copy; 2019
+// Bootstrap core JavaScript
+script(src='/bootstrap/vendor/jquery/jquery.min.js')
+script(src='/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js')
+// Plugin JavaScript
+script(src='/bootstrap/vendor/jquery-easing/jquery.easing.min.js')
+// Contact Form JavaScript
+script(src='/bootstrap/js/jqBootstrapValidation.js')
+script(src='/bootstrap/js/contact_me.js')
+// Custom scripts for this template
+script(src='/bootstrap/js/freelancer.min.js')
+

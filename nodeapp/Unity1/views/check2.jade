@@ -1,0 +1,29 @@
+doctype html
+head
+  include ./head.jade
+br
+br
+section#contact.page-section
+  .container
+    // Contact Section Heading
+    h2.page-section-heading.text-center.text-uppercase.text-secondary.mb-0= result
+    // Icon Divider
+    .divider-custom
+      .divider-custom-line
+      .divider-custom-icon
+        i.fas.fa-star
+      .divider-custom-line
+    // Contact Section Form
+    .row
+      .col-lg-8.mx-auto
+        br
+        form(action='' method='post' name='submit')
+          .control-group
+            .form-group.floating-label-form-group.controls.mb-0.pb-2
+              h3.text-uppercase.mb-4 are you sure?
+          br
+          #success
+          .form-group
+            button.btn.btn-primary.btn-xl(type='submit') submit
+#footer
+  include ./footer.jade

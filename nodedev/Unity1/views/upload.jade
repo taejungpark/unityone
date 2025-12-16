@@ -1,0 +1,142 @@
+doctype html
+head
+  include ./head.jade
+section#contact.page-section
+  br
+  br
+  .container
+    // Contact Section Heading
+    h2.page-section-heading.text-center.text-uppercase.text-secondary.mb-0= pageHeader.title
+    // Icon Divider
+    .divider-custom
+      .divider-custom-line
+      .divider-custom-icon
+        i.fas.fa-star
+      .divider-custom-line
+    // Contact Section Form
+    .row
+      .col-lg-8.mx-auto
+        br
+        form(action='' method='post' name='submit')
+          .control-group
+            .form-group.floating-label-form-group.controls.mb-0.pb-2
+              h3.text-uppercase.mb-4 Personal Info
+              label name
+              input.form-control(name='name' type='text' placeholder='Name' required='required' data-validation-required-message='Please enter your name.')
+              p.help-block.text-danger
+          .control-group
+            .form-group.floating-label-form-group.controls.mb-0.pb-2
+              label id
+              input.form-control(name='id' type='text' placeholder='Student ID(학번)' required='required' data-validation-required-message='Please enter your studnet id.')
+              p.help-block.text-danger
+          
+          // 학기 선택 라디오 버튼 추가
+          .control-group
+            .form-group.controls.mb-3.pb-2
+              label.d-block.mb-2 Semester
+              .form-check.form-check-inline
+                input.form-check-input(type='radio' name='semester' id='semester1' value='1' required='required')
+                label.form-check-label(for='semester1') 1학기 
+              .form-check.form-check-inline.ml-4
+                input.form-check-input(type='radio' name='semester' id='semester2' value='2' required='required')
+                label.form-check-label(for='semester2') 2학기 
+              p.help-block.text-danger
+              small.form-text.text-muted#semesterInfo
+          
+          br
+          br
+          .control-group
+            .form-group.floating-label-form-group.controls.mb-0.pb-2
+              h3.text-uppercase.mb-4 game info
+              label game_title
+              input.form-control(name='game_title' type='text' placeholder='Game Title' required='required' data-validation-required-message='Please enter your game name.')
+              p.help-block.text-danger
+          .control-group
+            .form-group.floating-label-form-group.controls.mb-0.pb-2
+              label passwd
+              input.form-control(name='passwd' type='password' placeholder='Password(제출한 게임 삭제/수정 시 필요)' required='required' data-validation-required-message='Please enter your password.')
+              p.help-block.text-danger
+          .control-group
+            .form-group.floating-label-form-group.controls.mb-0.pb-2
+              label content
+              textarea.form-control(name='content' rows='5' placeholder='Explain your game briefly' required='required' data-validation-required-message='Please enter a message.')
+              p.help-block.text-danger
+          br
+          #success
+          .form-group
+            button.btn.btn-primary.btn-xl(type='submit', id='submitBtn') submit
+#footer
+  include ./footer.jade
+
+// 학기 자동 선택 스크립트
+script.
+  document.addEventListener('DOMContentLoaded', function() {
+    // 현재 날짜 가져오기
+    const today = new Date();
+    const month = today.getMonth() + 1; // getMonth()는 0부터 시작하므로 1을 더함
+    
+    // 학기 결정 로직
+    let selectedSemester;
+    if (month >= 3 && month <= 8) {
+      // 3월-8월: 1학기
+      selectedSemester = 1;
+    } else {
+      // 9월-12월, 1월-2월: 2학기
+      selectedSemester = 2;
+    }
+    
+    // 라디오 버튼 자동 선택
+    const semesterRadio = document.getElementById('semester' + selectedSemester);
+    if (semesterRadio) {
+      semesterRadio.checked = true;
+    }
+    
+    // 정보 메시지 표시
+    const semesterInfo = document.getElementById('semesterInfo');
+    if (semesterInfo) {
+      const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+      semesterInfo.textContent = `현재 ${monthNames[month - 1]}이므로 ${selectedSemester}학기가 자동 선택되었습니다. 임의로 변경하지 마세요.`;
+    }
+
+  
+    
+    // 학번 입력 필드에서 포커스를 잃을 때 중복 체크
+    var idInput = document.querySelector('input[name="id"]');
+    if (idInput) {
+      idInput.addEventListener('blur', function() {
+        var studentId = this.value.trim();
+        if (studentId) {
+          checkDuplicate(studentId);
+        }
+      });
+    }
+    
+    function checkDuplicate(studentId) {
+      var year = new Date().getFullYear();
+      var semester = document.querySelector('input[name="semester"]:checked');
+      
+      if (!semester) return;
+      
+      fetch('/check-duplicate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          student_id: studentId,
+          year: year,
+          semester: semester.value
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.exists) {
+          alert('학번 ' + studentId + '는 이미 "' + data.game_name + '" 게임을 제출했습니다.\n새로 제출하려면 기존 제출물을 먼저 삭제해주세요.');
+          document.getElementById('submitBtn').disabled = true;
+        } else {
+          document.getElementById('submitBtn').disabled = false;
+        }
+      });
+    }
+    
+  });

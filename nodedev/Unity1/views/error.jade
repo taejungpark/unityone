@@ -1,0 +1,54 @@
+// views/error.jade
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
+  title Error - #{message}
+  link(href='/bootstrap/vendor/fontawesome-free/css/all.min.css' rel='stylesheet' type='text/css')
+  link(href='/bootstrap/css/freelancer.min.css' rel='stylesheet')
+
+body
+  // Navigation
+  nav#mainNav.navbar.navbar-expand-lg.bg-secondary.text-uppercase.fixed-top
+    .container
+      a.navbar-brand.js-scroll-trigger(href='/') Unity One
+  
+  // Error Section
+  section.page-section.mt-5
+    .container
+      h2.page-section-heading.text-center.text-uppercase.text-secondary.mb-0 
+        i.fas.fa-exclamation-triangle.mr-2
+        | Error
+      
+      .divider-custom
+        .divider-custom-line
+        .divider-custom-icon
+          i.fas.fa-times
+        .divider-custom-line
+      
+      .row
+        .col-lg-8.mx-auto.text-center
+          .alert.alert-danger
+            h4.alert-heading= message || 'An error occurred'
+            if error && error.status
+              p Status Code: #{error.status}
+            if error && error.stack && settings.env === 'development'
+              hr
+              pre.text-left= error.stack
+          
+          br
+          a.btn.btn-primary(href='/') 
+            i.fas.fa-home.mr-2
+            | Go to Home
+          a.btn.btn-secondary.ml-2(href='javascript:history.back()') 
+            i.fas.fa-arrow-left.mr-2
+            | Go Back
+
+  // Footer
+  footer.footer.text-center.mt-5
+    .container
+      small Copyright &copy; 2019-2025
+
+  // Scripts
+  script(src='/bootstrap/vendor/jquery/jquery.min.js')
+  script(src='/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js')

@@ -1,0 +1,274 @@
+doctype html
+html
+  head
+    include ./head.jade
+  body
+    section#contact.page-section
+      .container
+        h2.page-section-heading.text-center.text-uppercase.text-secondary.mb-0= pageHeader.title
+        if gameName
+          h4.text-center.text-muted.mb-4 #{gameName}
+
+        .divider-custom
+          .divider-custom-line
+          .divider-custom-icon
+            i.fas.fa-star
+          .divider-custom-line
+
+        .row
+          .col-lg-8.mx-auto
+            .alert.alert-info
+              h5.alert-heading Unity WebGL Build Upload Instructions
+              ol
+                li
+                  strong Step 1:
+                  |  Upload a thumbnail image
+                li
+                  strong Step 2:
+                  |  Select your Unity WebGL build folder (with Build/, TemplateData/, etc.)
+              hr
+              p.mb-0
+                strong Note:
+                |  Folder structure will be preserved.
+
+        .row
+          .col-lg-8.mx-auto
+            br
+            form#uploadForm(enctype='multipart/form-data', method='post')
+              // Thumbnail
+              .form-group
+                label.h5(for='thumbnail')
+                  i.fas.fa-image.mr-2 
+                  | Thumbnail Image
+                input#thumbnail.form-control-file(type='file', name='thumbnail', accept='image/*', required)
+                small.form-text.text-muted Upload a preview image for your game (PNG, JPG, GIF)
+
+              hr.my-4
+
+              // Unity folder
+              .form-group
+                label.h5(for='unity_folder')
+                  i.fas.fa-folder-open.mr-2 
+                  | Unity WebGL Build Folder
+                input#unity_folder.form-control-file(
+                  type='file',
+                  name='unity_files',
+                  webkitdirectory='',
+                  directory='',
+                  multiple,
+                  required
+                )
+                small.form-text.text-muted
+                  | Select the folder containing your Unity WebGL build (index.html, Build/, TemplateData/, etc.)
+
+              // File List Preview
+              #fileListCard.card.mb-4(style='display:none;')
+                .card-header
+                  h6.mb-0 Selected Files
+                .card-body
+                  #fileList.small
+
+              // Upload progress
+              #uploadProgress.progress.mb-3(style='display:none;')
+                #progressBar.progress-bar.progress-bar-striped.progress-bar-animated(
+                  role='progressbar',
+                  style='width: 0%',
+                  aria-valuenow='0',
+                  aria-valuemin='0',
+                  aria-valuemax='100'
+                ) 0%
+
+              br
+              #success
+              .form-group
+                button#submitBtn.btn.btn-primary.btn-xl(type='submit')
+                  i.fas.fa-upload.mr-2 
+                  | Upload Files
+
+    #footer
+      include ./footer.jade
+
+    // Scripts at the end of body
+    script.
+      (function() {
+        'use strict';
+        
+        // Variables
+        var thumbnailFile = null;
+        var unityFiles = [];
+        
+        // Main initialization function
+        function initializeUpload() {
+          console.log('Initializing upload form...');
+          
+          // Get elements
+          var thumbInput = document.getElementById('thumbnail');
+          var folderInput = document.getElementById('unity_folder');
+          var fileListCard = document.getElementById('fileListCard');
+          var fileList = document.getElementById('fileList');
+          var submitBtn = document.getElementById('submitBtn');
+          var progressBar = document.getElementById('progressBar');
+          var uploadProgress = document.getElementById('uploadProgress');
+          var uploadForm = document.getElementById('uploadForm');
+          
+          // Check if elements exist
+          if (!thumbInput || !folderInput || !uploadForm) {
+            console.error('Required form elements not found');
+            return;
+          }
+          
+          console.log('All form elements found');
+          
+          // Thumbnail selection
+          thumbInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files.length > 0) {
+              thumbnailFile = e.target.files[0];
+              console.log('Thumbnail selected:', thumbnailFile.name);
+            }
+          });
+          
+          // Folder selection
+          folderInput.addEventListener('change', function(e) {
+            if (!e.target.files) return;
+            
+            // Convert FileList to array without Array.from
+            unityFiles = [];
+            for (var i = 0; i < e.target.files.length; i++) {
+              unityFiles.push(e.target.files[i]);
+            }
+            
+            if (unityFiles.length === 0) return;
+            
+            console.log('Files selected:', unityFiles.length);
+            fileListCard.style.display = 'block';
+            
+            var structure = {};
+            var totalSize = 0;
+            
+            for (var i = 0; i < unityFiles.length; i++) {
+              var file = unityFiles[i];
+              totalSize += file.size;
+              var relativePath = file.webkitRelativePath || file.name;
+              
+              console.log('File ' + i + ':', file.name, 'Path:', relativePath);
+              
+              var parts = relativePath.split('/');
+              var folder = parts.length > 2 ? parts.slice(1, -1).join('/') : 'root';
+              if (!structure[folder]) structure[folder] = [];
+              structure[folder].push(file.name);
+            }
+            
+            // Build display HTML
+            var html = '<div class="file-tree">';
+            for (var folderName in structure) {
+              html += '<div class="mb-2"><strong><i class="fas fa-folder mr-1"></i>' + folderName + '/</strong>';
+              html += '<ul class="small">';
+              var files = structure[folderName];
+              for (var j = 0; j < files.length; j++) {
+                html += '<li>' + files[j] + '</li>';
+              }
+              html += '</ul></div>';
+            }
+            html += '</div><hr>';
+            html += '<strong>Total files:</strong> ' + unityFiles.length + '<br>';
+            html += '<strong>Total size:</strong> ' + (totalSize / 1024 / 1024).toFixed(2) + ' MB';
+            fileList.innerHTML = html;
+          });
+          
+          // Form submission
+          uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submission started');
+            
+            if (!thumbnailFile || unityFiles.length === 0) {
+              alert('Please select both a thumbnail and Unity folder.');
+              return;
+            }
+            
+            var formData = new FormData();
+            
+            // Add thumbnail
+            formData.append('thumbnail', thumbnailFile);
+            console.log('Added thumbnail:', thumbnailFile.name);
+            
+            // Add Unity files with path info
+            var pathInfo = [];
+            
+            for (var i = 0; i < unityFiles.length; i++) {
+              var file = unityFiles[i];
+              
+              // Add file to FormData
+              formData.append('unity_files', file);
+              
+              // Prepare path info
+              var fullPath = file.webkitRelativePath || file.name;
+              var parts = fullPath.split('/');
+              var relativePath = parts.length > 1 ? parts.slice(1).join('/') : file.name;
+              
+              pathInfo.push({
+                index: i,
+                filename: file.name,
+                fullPath: fullPath,
+                relativePath: relativePath
+              });
+              
+              console.log('Added file ' + i + ':', file.name, 'with path:', relativePath);
+            }
+            
+            // Add path information
+            formData.append('file_paths', JSON.stringify(pathInfo));
+            console.log('Path info:', pathInfo);
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+            uploadProgress.style.display = 'block';
+            
+            // Create and send request
+            var xhr = new XMLHttpRequest();
+            var url = window.location.pathname + window.location.search;
+            console.log('Posting to:', url);
+            
+            xhr.open('POST', url);
+            
+            xhr.upload.onprogress = function(e) {
+              if (e.lengthComputable) {
+                var percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percent + '%';
+                progressBar.textContent = percent + '%';
+                console.log('Upload progress:', percent + '%');
+              }
+            };
+            
+            xhr.onload = function() {
+              console.log('Upload complete. Status:', xhr.status);
+              console.log('Response:', xhr.responseText);
+              
+              if (xhr.status === 200) {
+                window.location.href = '/completeFile';
+              } else {
+                alert('Upload failed: ' + xhr.responseText);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Upload Files';
+              }
+            };
+            
+            xhr.onerror = function() {
+              console.error('Upload error');
+              alert('Upload failed due to network error.');
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Upload Files';
+            };
+            
+            console.log('Sending request...');
+            xhr.send(formData);
+          });
+        }
+        
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initializeUpload);
+        } else {
+          initializeUpload();
+        }
+      })();

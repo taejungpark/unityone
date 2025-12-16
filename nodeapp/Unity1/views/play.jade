@@ -1,0 +1,84 @@
+// views/play.jade
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
+    title= game_title || 'Play Game'
+    link(href='/bootstrap/vendor/fontawesome-free/css/all.min.css' rel='stylesheet' type='text/css')
+    link(href='/bootstrap/css/freelancer.min.css' rel='stylesheet')
+    style.
+      #game-container {
+        width: 100%;
+        height: 80vh;
+        position: relative;
+      }
+      #game-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .game-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+  
+  body
+    // Navigation
+    nav#mainNav.navbar.navbar-expand-lg.bg-secondary.text-uppercase.fixed-top
+      .container
+        a.navbar-brand.js-scroll-trigger(href='/') Unity One
+        button.navbar-toggler.navbar-toggler-right(type='button' data-toggle='collapse' data-target='#navbarResponsive')
+          | Menu
+          i.fas.fa-bars
+        #navbarResponsive.collapse.navbar-collapse
+          ul.navbar-nav.ml-auto
+            li.nav-item
+              a.nav-link(href='/playlist/') Back to Playlist
+    
+    // Game Section
+    section.page-section.mt-5
+      .container
+        .game-info
+          h2.text-center= game_title
+          if content
+            p.text-center.text-muted= content
+          
+          .text-center.mt-3
+            if result && result.length > 0
+              small.text-muted
+                strong Team Members: 
+                each member, index in result
+                  = member.name + ' (' + member.id + ')'
+                  if index < result.length - 1
+                    | , 
+        
+        // Unity WebGL Game Container
+        #game-container
+          iframe#game-iframe(src=gameUrl allowfullscreen='true' scrolling='no')
+        
+        .text-center.mt-3
+          button.btn.btn-primary(onclick='toggleFullscreen()')
+            i.fas.fa-expand.mr-2
+            | Fullscreen
+          a.btn.btn-secondary.ml-2(href='/playlist')
+            i.fas.fa-arrow-left.mr-2
+            | Back to List
+    
+    script.
+      function toggleFullscreen() {
+        var iframe = document.getElementById('game-iframe');
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen();
+        } else if (iframe.webkitRequestFullscreen) {
+          iframe.webkitRequestFullscreen();
+        } else if (iframe.msRequestFullscreen) {
+          iframe.msRequestFullscreen();
+        }
+      }
+    
+    // Scripts
+    script(src='/bootstrap/vendor/jquery/jquery.min.js')
+    script(src='/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js')

@@ -1,0 +1,230 @@
+doctype html
+head
+  include ./head.jade
+
+section#contact.page-section
+  br
+  br
+  .container
+    // Delete Section Heading
+    h2.page-section-heading.text-center.text-uppercase.text-secondary.mb-0= pageHeader.title
+    // Icon Divider
+    .divider-custom
+      .divider-custom-line
+      .divider-custom-icon
+        i.fas.fa-star
+      .divider-custom-line
+    
+    // Delete Form
+    .row
+      .col-lg-8.mx-auto
+        br
+        .alert.alert-warning
+          h5.alert-heading 
+            i.fas.fa-exclamation-triangle.mr-2
+            | Warning - Game Deletion
+          p This action will permanently delete the game and all associated files.
+          hr
+          p.mb-0 Please enter your information and the game password to confirm deletion.
+        
+        // Form 시작 - 모든 입력 필드와 버튼을 포함
+        form(action='/delete' method='POST' id='deleteForm')
+          // Personal Information Section
+          h4.text-uppercase.mb-3 Your Information
+          
+          .row
+            .col-md-6
+              .control-group
+                .form-group.floating-label-form-group.controls.mb-3
+                  label Student ID
+                  input.form-control(
+                    id='student_id'
+                    name='student_id' 
+                    type='text' 
+                    placeholder='Student ID' 
+                    required
+                  )
+                  p.help-block.text-danger
+            
+            .col-md-6
+              .control-group
+                .form-group.floating-label-form-group.controls.mb-3
+                  label Name
+                  input.form-control(
+                    id='student_name'
+                    name='student_name' 
+                    type='text' 
+                    placeholder='Your Name' 
+                    required
+                  )
+                  p.help-block.text-danger
+          
+          hr.my-4
+          
+          // Game Information Section
+          h4.text-uppercase.mb-3 Game Information
+          
+          .control-group
+            .form-group.floating-label-form-group.controls.mb-3
+              label Game Password
+              input.form-control(
+                id='password'
+                name='password' 
+                type='password' 
+                placeholder='Game Password' 
+                required
+              )
+              p.help-block.text-danger
+          
+          // Year and Semester selection
+          .row
+            .col-md-6
+              .control-group
+                .form-group.controls.mb-3
+                  label Year
+                  select.form-control(name='year' id='year')
+                    - var currentYear = new Date().getFullYear()
+                    - for (var y = 2020; y <= currentYear + 1; y++)
+                      option(value=y selected=(y == currentYear))= y
+            
+            .col-md-6
+              .control-group
+                .form-group.controls.mb-3
+                  label Semester
+                  select.form-control(name='semester' id='semester')
+                    option(value='1') Spring (1학기)
+                    option(value='2') Fall (2학기)
+          
+          // Verification Result (hidden initially)
+          #verificationResult.alert.alert-info.mt-4(style='display:none;')
+            h5.alert-heading Verification Result
+            #gameInfo
+          
+          br
+          .form-group.text-center
+            button.btn.btn-primary.btn-xl(type='button' id='verifyBtn') 
+              i.fas.fa-check.mr-2
+              | Verify Information
+            button.btn.btn-danger.btn-xl.ml-2(type='submit' id='deleteBtn' style='display:none;') 
+              i.fas.fa-trash-alt.mr-2
+              | Confirm Delete
+            a.btn.btn-secondary.btn-xl.ml-2(href='/playlist') 
+              i.fas.fa-times.mr-2
+              | Cancel
+
+#footer
+  include ./footer.jade
+
+// JavaScript
+script.
+  (function() {
+    // 현재 날짜 기반 학기 자동 선택
+    document.addEventListener('DOMContentLoaded', function() {
+      var month = new Date().getMonth() + 1;
+      var semester = (month >= 3 && month <= 8) ? 1 : 2;
+      document.getElementById('semester').value = semester;
+    });
+    
+    // Verify 버튼 클릭 처리
+    document.getElementById('verifyBtn').addEventListener('click', function() {
+      var form = document.getElementById('deleteForm');
+      
+      // 입력값 검증
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      // 폼 데이터 수집
+      var formData = new FormData(form);
+      var data = {
+        student_id: formData.get('student_id'),
+        student_name: formData.get('student_name'),
+        password: formData.get('password'),
+        year: formData.get('year'),
+        semester: formData.get('semester')
+      };
+      
+      console.log('Verifying with data:', data);
+      
+      // 로딩 표시
+      var verifyBtn = document.getElementById('verifyBtn');
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verifying...';
+      
+      // AJAX로 게임 정보 확인
+      fetch('/delete/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Verify Information';
+        
+        if (data.success) {
+          // 게임 정보 표시
+          document.getElementById('verificationResult').style.display = 'block';
+          
+          var html = '<p><strong>Game Title:</strong> ' + data.game.game_name + '</p>';
+          html += '<p><strong>Upload Date:</strong> ' + new Date(data.game.uploadAt).toLocaleDateString() + '</p>';
+          html += '<p><strong>Team Members:</strong></p>';
+          html += '<ul>';
+          
+          // 팀 멤버 정보 표시
+          if (data.game.name && data.game.id) {
+            for (var i = 0; i < data.game.name.length; i++) {
+              html += '<li>' + data.game.name[i] + ' (' + data.game.id[i] + ')</li>';
+            }
+          }
+          
+          html += '</ul>';
+          
+          if (data.isAuthorized) {
+            html += '<p class="text-success"><strong>✓ Authorized:</strong> You can delete this game.</p>';
+            document.getElementById('deleteBtn').style.display = 'inline-block';
+            document.getElementById('verifyBtn').style.display = 'none';
+          } else {
+            html += '<p class="text-danger"><strong>✗ Not Authorized:</strong> Only team members can delete this game.</p>';
+            document.getElementById('deleteBtn').style.display = 'none';
+          }
+          
+          document.getElementById('gameInfo').innerHTML = html;
+        } else {
+          alert(data.message || 'Game not found or invalid information');
+          document.getElementById('verificationResult').style.display = 'none';
+        }
+      })
+      .catch(function(error) {
+        console.error('Error:', error);
+        alert('Error verifying game information. Please try again.');
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Verify Information';
+      });
+    });
+    
+    // Form submit 확인
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+      console.log('Form is being submitted');
+      console.log('Form data:', {
+        student_id: document.getElementById('student_id').value,
+        student_name: document.getElementById('student_name').value,
+        password: document.getElementById('password').value,
+        year: document.getElementById('year').value,
+        semester: document.getElementById('semester').value
+      });
+      
+      if (!confirm('Are you absolutely sure you want to delete this game? This action cannot be undone!')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  })();
